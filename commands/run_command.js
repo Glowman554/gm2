@@ -6,13 +6,13 @@ export class RunCommand extends BaseCommand {
 		super(args, null);
 	}
 
-	execute() {
+	async execute() {
 		if (this.args.length == 0) {
 			throw new Error("No name specified");
 		} else {
 			while (this.args.length != 0) {
 				var task_name = this.args.shift();
-				execute_gm_task(JSON.parse(Deno.readTextFileSync("gm2.json")), task_name);
+				await execute_gm_task(JSON.parse(Deno.readTextFileSync("gm2.json")), task_name);
 			}
 		}
 	}
