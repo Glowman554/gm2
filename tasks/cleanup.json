@@ -1,0 +1,10 @@
+{
+	"name": "cleanup",
+	"commands": [
+		"rm gm2.bundle.js",
+		"rm gm2.bundle"
+	],
+	"dependencies": [],
+	"run_after_task": [],
+	"allow_fail": false
+}

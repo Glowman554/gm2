@@ -1,0 +1,11 @@
+{
+	"name": "gm2",
+	"description": "A simple build system",
+	"author": "glowman554",
+	"version": "0.0.1",
+	"task_dir": "tasks",
+	"variables": {
+		"install_path": "/bin/"
+	},
+	"custom_header": "YEET MAKE"
+}

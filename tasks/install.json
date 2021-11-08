@@ -1,0 +1,13 @@
+{
+	"name": "install",
+	"commands": [
+		"sudo cp gm2.bundle ${install_path}/gm2"
+	],
+	"dependencies": [
+		"compile"
+	],
+	"run_after_task": [
+		"cleanup"
+	],
+	"allow_fail": false
+}
