@@ -7,5 +7,6 @@
 	"variables": {
 		"install_path": "/bin/"
 	},
-	"custom_header": "YEET MAKE"
+	"custom_header": "YEET MAKE",
+	"non_silent": true
 }

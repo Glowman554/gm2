@@ -9,7 +9,8 @@ export class InitCommand extends BaseCommand {
 			"--version",
 			"--task_dir",
 			"--custom_header",
-			"--variable"
+			"--variable",
+			"--non_silent"
 		]);
 	}
 
@@ -31,6 +32,8 @@ export class InitCommand extends BaseCommand {
 			var variable = this.parser.consume_option("--variable").split(":");
 			gm2_file_obj.variables[variable[0]] = variable[1];
 		}
+
+		gm2_file_obj.non_silent = this.parser.is_option_set("--non_silent");
 
 		Deno.writeTextFileSync("gm2.json", JSON.stringify(gm2_file_obj, null, "\t"));
 

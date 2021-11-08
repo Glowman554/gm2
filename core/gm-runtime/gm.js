@@ -1,5 +1,5 @@
 import { debug_log } from "../logger.js";
-import { exists } from "../util.js";
+import { exists, update_console_line_raw } from "../util.js";
 import getFiles from "../../deno-getfiles/mod.ts";
 
 async function apply_inline_function_findall(gm2_file_obj, command) {
@@ -29,7 +29,7 @@ async function apply_inline_prompt(gm2_file_obj, command) {
 	if (prompt_in_command !== null) {
 		for (var j = 0; j < prompt_in_command.length; j++) {
 			debug_log(`Prompting for input`);
-			var input = prompt(command + " > ");
+			var input = prompt(" > ");
 
 			command = command.replace(prompt_in_command[j], input);
 		}
@@ -87,14 +87,15 @@ async function run_commands(gm2_file_obj, commands, allow_fail, file_path = null
 			command = command.replace(/\${file}/g, file_path);
 		}
 
-		console.log(`> ${command}`);
+		update_console_line_raw(`> ${command}${gm2_file_obj.non_silent ? "\n" : ""}`);
 
 		command = await preprocess_command(gm2_file_obj, command);
 
 		let p = Deno.run({
 			cmd: command.split(" "),
-			stdout: "inherit",
-			stderr: "inherit"
+			stdout: !gm2_file_obj.non_silent ? "piped" : "inherit",
+			stderr: !gm2_file_obj.non_silent ? "piped" : "inherit",
+			stdin: "inherit"
 		});
 
 		var status = await p.status();
@@ -160,4 +161,7 @@ export async function execute_gm_task(gm2_file_obj, task_name) {
 		debug_log(`Executing after task ${task}`);
 		await execute_gm_task(gm2_file_obj, task);
 	}
+
+	update_console_line_raw(`> Finished task ${task_name}`);
+	console.log("");
 }
