@@ -4,6 +4,7 @@ import { TaskCommand } from "./task_command.js";
 import { VariableCommand } from "./variable_command.js";
 import { HelpCommand } from "./help_command.js";
 import { RunCommand } from "./run_command.js";
+import { InfoCommand } from "./info_command.js";
 
 export var commands = [
 	{
@@ -29,5 +30,9 @@ export var commands = [
 	{
 		name: "run",
 		command: RunCommand
+	},
+	{
+		name: "info",
+		command: InfoCommand
 	}
 ];
