@@ -59,11 +59,11 @@ async function lookup_variables(gm2_file_obj, command) {
 		for (var j = 0; j < variables_in_command.length; j++) {
 			var variable_name = variables_in_command[j].substring(2, variables_in_command[j].length - 1);
 				
-			if (!gm2_file_obj.variables || !gm2_file_obj.variables[variable_name]) {
+			if ((!gm2_file_obj.variables || !gm2_file_obj.variables[variable_name]) && !Deno.env.get(variable_name)) {
 				throw new Error("Variable not found: " + variable_name);
 			}
 
-			var variable_value = gm2_file_obj.variables[variable_name];
+			var variable_value = gm2_file_obj.variables[variable_name] ? gm2_file_obj.variables[variable_name] : Deno.env.get(variable_name);
 
 			debug_log(`Replacing variable ${variable_name} with value "${variable_value}"`);
 
