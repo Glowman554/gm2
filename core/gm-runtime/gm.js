@@ -167,7 +167,7 @@ export async function execute_gm_task(gm2_file_obj, task_name) {
 		await run_in_dir(task_obj, async () => {
 			var files = getFiles(".");
 			for (let file of files) {
-				if (file.ext == task_obj.run_for) {
+				if (file.ext == task_obj.run_for || task_obj.run_for == "*") {
 					debug_log(`Executing task ${task_name} for ${file.path}`);
 					await run_commands(gm2_file_obj, task_obj.commands, task_obj.allow_fail, file.path);
 
