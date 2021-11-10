@@ -24,6 +24,28 @@ async function apply_inline_function_findall(gm2_file_obj, command) {
 	return command;
 }
 
+async function apply_inline_function_findall_comma(gm2_file_obj, command) {
+	var findall_in_command = command.match(/\$\{findall_comma [A-Za-z0-9_]+\}/g);
+	if (findall_in_command !== null) {
+		for (var j = 0; j < findall_in_command.length; j++) {
+			var extension_to_search = findall_in_command[j].substring(16, findall_in_command[j].length - 1);
+
+			var files_found = [];
+			var files = getFiles(".");
+
+			for (var k = 0; k < files.length; k++) {
+				if (files[k].ext == extension_to_search) {
+					files_found.push(files[k].path);
+				}
+			}
+
+			debug_log(`Found ${files_found.length} files with extension ${extension_to_search}`);
+			command = command.replace(findall_in_command[j], files_found.join(","));
+		}
+	}
+	return command;
+}
+
 async function apply_inline_prompt(gm2_file_obj, command) {
 	var prompt_in_command = command.match(/\$\{prompt\}/g);
 	if (prompt_in_command !== null) {
@@ -41,6 +63,7 @@ async function apply_inline_prompt(gm2_file_obj, command) {
 async function apply_inline_functions(gm2_file_obj, command) {
 	var inline_functions = [
 		apply_inline_function_findall,
+		apply_inline_function_findall_comma,
 		apply_inline_prompt
 	];
 

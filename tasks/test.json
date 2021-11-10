@@ -1,7 +1,8 @@
 {
 	"name": "test",
 	"commands": [
-		"echo ${PATH}"
+		"echo ${PATH}",
+		"echo ${findall_comma js}"
 	],
 	"dependencies": [],
 	"run_after_task": [],
