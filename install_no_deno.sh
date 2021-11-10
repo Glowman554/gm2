@@ -17,6 +17,7 @@ function install_application {
 function run_cleanup {
 	printf "[\033[31m**\033[0m] Cleaning up...\r"
 	rm -rf bin/ &> /dev/null || (printf "\nFailed to remove bin/\n" && exit 1)
+	rm -rf $HOME/.gm2-src &> /dev/null || (printf "\nFailed to remove $HOME/.gm2-src/\n" && exit 1)
 	printf "[\033[32mOK\033[0m]\n"
 }
 
