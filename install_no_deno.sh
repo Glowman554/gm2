@@ -35,6 +35,9 @@ function get_deno {
 	
 		export DENO_INSTALL="$deno_install"
 		export PATH="$DENO_INSTALL/bin:$PATH"
+
+		printf "\n\nexport DENO_INSTALL=\"$deno_install\"\n" >> $HOME/.bashrc
+		printf "export PATH=\"\$DENO_INSTALL/bin:\$PATH\"\n" >> $HOME/.bashrc
 	fi
 }
 
