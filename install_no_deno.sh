@@ -22,14 +22,20 @@ function run_cleanup {
 }
 
 function get_deno {
-	printf "[\033[31m**\033[0m] Installing deno...\r"
-	(curl -fsSL https://deno.land/x/install/install.sh | sh) &> /tmp/deno.log || (printf "\nFailed to install deno\n" && exit 1)
-	printf "[\033[32mOK\033[0m]\n"
+	deno -V &> /dev/null
+	if [ $? -eq 0 ]
+	then
+    		printf "[\033[32m--\033[0m] Installing deno...\n"
+    	else
+		printf "[\033[31m**\033[0m] Installing deno...\r"
+		(curl -fsSL https://deno.land/x/install/install.sh | sh) &> /tmp/deno.log || (printf "\nFailed to install deno\n" && exit 1)
+		printf "[\033[32mOK\033[0m]\n"
 
-	local deno_install="${DENO_INSTALL:-$HOME/.deno}"
+		local deno_install="${DENO_INSTALL:-$HOME/.deno}"
 	
-	export DENO_INSTALL="$deno_install"
-	export PATH="$DENO_INSTALL/bin:$PATH"
+		export DENO_INSTALL="$deno_install"
+		export PATH="$DENO_INSTALL/bin:$PATH"
+	fi
 }
 
 function setup_repo {
