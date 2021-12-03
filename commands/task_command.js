@@ -42,7 +42,7 @@ export class TaskCommand extends BaseCommand {
 		}
 		
 		if (this.parser.is_option_set("--run_in_dir")) {
-			task_obj.run_in = this.parser.consume_option("--run_for");
+			task_obj.run_in = this.parser.consume_option("--run_in_dir");
 		}
 
 		Deno.writeTextFileSync(task_dir + "/" + task_obj.name + ".json", JSON.stringify(task_obj, null, "\t"));
