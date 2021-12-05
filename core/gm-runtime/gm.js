@@ -1,6 +1,7 @@
 import { debug_log } from "../logger.js";
 import { exists, update_console_line_raw } from "../util.js";
 import getFiles from "../../deno-getfiles/mod.ts";
+import { csv } from "../csv.js";
 
 async function apply_inline_function_findall(gm2_file_obj, command) {
 	var findall_in_command = command.match(/\$\{findall [A-Za-z0-9_]+\}/g);
@@ -104,7 +105,7 @@ async function preprocess_command(gm2_file_obj, command) {
 	return command;
 }
 
-async function run_commands(gm2_file_obj, commands, allow_fail, file_path = null) {
+async function run_commands(gm2_file_obj, commands, allow_fail, file_path = null, build_info = null) {
 	for (let command of commands) {
 		if (file_path) {
 			command = command.replace(/\${file}/g, file_path);
@@ -113,6 +114,10 @@ async function run_commands(gm2_file_obj, commands, allow_fail, file_path = null
 		update_console_line_raw(`> ${command}${gm2_file_obj.non_silent ? "\n" : ""}`);
 
 		command = await preprocess_command(gm2_file_obj, command);
+
+		if (build_info) {
+			build_info.csv.pushRow([ build_info.task_name, command ]);
+		}
 
 		let p = Deno.run({
 			cmd: command.split(" "),
@@ -147,18 +152,24 @@ async function run_in_dir(task_obj, func) {
 	Deno.chdir(current_dir);
 }
 
-export async function execute_gm_task(gm2_file_obj, task_name) {
+export async function execute_gm_task(gm2_file_obj, task_name, build_info = null) {
 	var task_dir = gm2_file_obj.task_dir;
 
 	if (!exists(`${task_dir}/${task_name}.json`)) {
 		throw new Error(`Task ${task_name} does not exist.`);
 	}
 
+	if (build_info == null) {
+		build_info = new csv();
+		build_info.pushRow([ "Task name", "Executed commands" ]);
+		build_info.pushRow([ "", "" ]);
+	}
+
 	var task_obj = JSON.parse(Deno.readTextFileSync(`${task_dir}/${task_name}.json`));
 
 	for (let dependency of task_obj.dependencies) {
 		debug_log(`Executing dependency ${dependency}`);
-		await execute_gm_task(gm2_file_obj, dependency);
+		await execute_gm_task(gm2_file_obj, dependency, build_info);
 	}
 
 	if (task_obj.run_for) {
@@ -169,23 +180,30 @@ export async function execute_gm_task(gm2_file_obj, task_name) {
 			for (let file of files) {
 				if (file.ext == task_obj.run_for || task_obj.run_for == "*") {
 					debug_log(`Executing task ${task_name} for ${file.path}`);
-					await run_commands(gm2_file_obj, task_obj.commands, task_obj.allow_fail, file.path);
-
+					await run_commands(gm2_file_obj, task_obj.commands, task_obj.allow_fail, file.path, {
+						task_name: task_name,
+						csv: build_info
+					});
 				}
 			}
 		});
 	} else {
 		debug_log(`Executing task ${task_name}`);
 		await run_in_dir(task_obj, async () => {
-			await run_commands(gm2_file_obj, task_obj.commands, task_obj.allow_fail);
+			await run_commands(gm2_file_obj, task_obj.commands, task_obj.allow_fail, null, {
+				task_name: task_name,
+				csv: build_info
+			});
 		});
 	}
 
 	for (let task of task_obj.run_after_task) {
 		debug_log(`Executing after task ${task}`);
-		await execute_gm_task(gm2_file_obj, task);
+		await execute_gm_task(gm2_file_obj, task, build_info);
 	}
 
 	update_console_line_raw(`> Finished task ${task_name}`);
 	console.log("");
+
+	return build_info;
 }

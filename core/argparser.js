@@ -39,7 +39,7 @@ export class ArgParser {
 					}
 				}
 			} else {
-				throw new Error("Invalid argument: " + arg);
+				//throw new Error("Invalid argument: " + arg);
 			}
 		}
 
