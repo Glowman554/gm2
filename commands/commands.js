@@ -5,6 +5,7 @@ import { VariableCommand } from "./variable_command.js";
 import { HelpCommand } from "./help_command.js";
 import { RunCommand } from "./run_command.js";
 import { InfoCommand } from "./info_command.js";
+import { ModifyCommand } from "./modify_command.js";
 
 export var commands = [
 	{
@@ -34,5 +35,9 @@ export var commands = [
 	{
 		name: "info",
 		command: InfoCommand
+	},
+	{
+		name: "modify",
+		command: ModifyCommand
 	}
 ];
