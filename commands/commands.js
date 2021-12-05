@@ -6,6 +6,7 @@ import { HelpCommand } from "./help_command.js";
 import { RunCommand } from "./run_command.js";
 import { InfoCommand } from "./info_command.js";
 import { ModifyCommand } from "./modify_command.js";
+import { PresetsCommand } from "./presets_command.js";
 
 export var commands = [
 	{
@@ -39,5 +40,9 @@ export var commands = [
 	{
 		name: "modify",
 		command: ModifyCommand
+	},
+	{
+		name: "presets",
+		command: PresetsCommand
 	}
 ];
