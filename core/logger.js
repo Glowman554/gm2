@@ -1,3 +1,8 @@
+let silent = true;
+
+export function set_non_silent() {
+	silent = false;
+}
 
 export function debug_log(what) {
 	const date = new Date(Date.now()).toUTCString();
@@ -15,4 +20,8 @@ export function debug_log(what) {
 	}
 
 	Deno.writeTextFileSync(log_file, log_entry + "\n", { append: true });
+
+	if (!silent) {
+		console.log(log_entry);
+	}
 }

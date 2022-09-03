@@ -1,7 +1,24 @@
-import { debug_log } from "../logger.js";
+import { debug_log, set_non_silent } from "../logger.js";
 import { exists, update_console_line_raw } from "../util.js";
 import getFiles from "../../deno-getfiles/mod.ts";
 import { csv } from "../csv.js";
+import {createHash} from "https://deno.land/std@0.80.0/hash/mod.ts";
+
+function hash_file(file_path) {
+	const hash = createHash("md5");
+
+	const file = Deno.openSync(Deno.realPathSync(file_path));
+
+	for (const chunk of Deno.iterSync(file)) {
+		hash.update(chunk);
+	}
+
+	let hash_str = hash.toString();
+
+	Deno.close(file.rid);
+
+	return hash_str;
+}
 
 async function apply_inline_function_findall(gm2_file_obj, command) {
 	var findall_in_command = command.match(/\$\{findall [A-Za-z0-9_]+\}/g);
@@ -119,8 +136,15 @@ async function run_commands(gm2_file_obj, commands, allow_fail, file_path = null
 			build_info.csv.pushRow([ build_info.task_name, command ]);
 		}
 
+		var actual_command = [];
+		for (let i of command.split(" ")) {
+			if (i != "") {
+				actual_command.push(i);
+			}
+		}
+
 		let p = Deno.run({
-			cmd: command.split(" "),
+			cmd: actual_command,
 			stdout: !gm2_file_obj.non_silent ? "piped" : "inherit",
 			stderr: !gm2_file_obj.non_silent ? "piped" : "inherit",
 			stdin: "inherit"
@@ -153,6 +177,10 @@ async function run_in_dir(task_obj, func) {
 }
 
 export async function execute_gm_task(gm2_file_obj, task_name, build_info = null) {
+	if (gm2_file_obj.non_silent) {
+		set_non_silent();
+	}
+
 	var task_dir = gm2_file_obj.task_dir;
 
 	if (!exists(`${task_dir}/${task_name}.json`)) {
@@ -176,16 +204,33 @@ export async function execute_gm_task(gm2_file_obj, task_name, build_info = null
 		debug_log(`Executing task ${task_name} for every .${task_obj.run_for} file`);
 
 		await run_in_dir(task_obj, async () => {
+			var cache = {};
+			try {
+				cache = JSON.parse(Deno.readTextFileSync(".gm2.cache"));
+			} catch (e) {
+				debug_log(String(e));
+			}
+
 			var files = getFiles(".");
 			for (let file of files) {
 				if (file.ext == task_obj.run_for || task_obj.run_for == "*") {
+					if (cache[file.path] != undefined) {
+						if (hash_file(file.path) == cache[file.path]) {
+							debug_log("file didnt change skipping...");
+							continue;
+						}
+					}
 					debug_log(`Executing task ${task_name} for ${file.path}`);
 					await run_commands(gm2_file_obj, task_obj.commands, task_obj.allow_fail, file.path, {
 						task_name: task_name,
 						csv: build_info
 					});
+
+					cache[file.path] = hash_file(file.path);
 				}
 			}
+
+			Deno.writeTextFileSync(".gm2.cache", JSON.stringify(cache, null, "\t"));
 		});
 	} else {
 		debug_log(`Executing task ${task_name}`);
